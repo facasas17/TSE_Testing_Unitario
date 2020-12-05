@@ -25,5 +25,14 @@
 
 /*=====[Definitions of private global variables]=============================*/
 
+void test_experimentSet( void ) 
+{
+   //int datos[] = {1,2,3,4,5};
+   //int resultado;
+   experiment_t experiment_input;
+
+   TEST_ASSERT_EQUAL(0, experimentSet(experiment_input));
+   //TEST_ASSERT_EQUAL(3, resultado);
+}
 
 /*=====[Prototypes (declarations) of private functions]====================*/

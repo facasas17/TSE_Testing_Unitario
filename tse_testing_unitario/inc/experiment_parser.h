@@ -19,6 +19,7 @@
 #include "string.h"
 #include "stdint.h"
 #include "stdio.h"
+#include "math.h"
 
 /*=====[C++ - begin]=========================================================*/
 
@@ -27,7 +28,7 @@ extern "C" {
 #endif
 
 /*=====[Definition macros of public constants]===============================*/
-#define DAC_RESOLUTION	16
+#define DAC_RESOLUTION	2^16
 #define DAC_VCC			3300	//Expresado en mV
 #define VIRTUAL_GND		1500	// Tierra virtual aplicada a los electrodos
 
@@ -40,6 +41,8 @@ typedef struct{
 	uint16_t v_min;
 	uint8_t scan_rate;
 	uint8_t cycles;
+	uint16_t cant_codes;
+	uint32_t delay;
 }cyclicVolt_t;
 
 typedef struct{
@@ -50,6 +53,7 @@ typedef struct{
 	uint8_t pulse_period;
 	uint16_t step_pulse;
 	uint8_t cycles;
+	uint32_t cant_codes;
 }squareWaveVolt_t;
 
 typedef struct{
@@ -63,8 +67,11 @@ typedef struct{
 
 /*=====[Prototypes (declarations) of public functions]=======================*/
 _Bool experimentSet(experiment_t *experiment_input);
-void convertVoltage(uint16_t *voltage);
+
+void convertVoltageToCode(uint16_t *voltage);
+
 void parseDataSWV(squareWaveVolt_t *swv_data);
+
 void parseDataCV(cyclicVolt_t *cv_data);
 
 

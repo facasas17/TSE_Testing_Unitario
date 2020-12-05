@@ -29,15 +29,18 @@
 /*=====[Prototypes (declarations) of private functions]====================*/
 static void setGainTIA(uint8_t value);
 
-void setGain();
-void setAutoGain();
+static void setGain(uint8_t resistance);
+
+static void clearGain(uint8_t resistance);
+
+static void setAutoGain();
 /*=====[Prototypes (declarations) of public functions]======================*/
 
 _Bool experimentSet(experiment_t *experiment_input)
 {
 	setGainTIA(experiment_input->current_range);
 
-	convertVoltage(&experiment_input->hold_voltage);
+	convertVoltageToCode(&experiment_input->hold_voltage);
 
 	if( !strcmp(experiment_input->experiment_type, "CV") )
 	{
@@ -55,19 +58,20 @@ _Bool experimentSet(experiment_t *experiment_input)
 
 void parseDataCV(cyclicVolt_t *cv_data)
 {
-	convertVoltage(&cv_data->v_max);
-	convertVoltage(&cv_data->v_min);
-	
-	//Calcular el step segun el scan rate y vmax y vmin
+	convertVoltageToCode(&cv_data->v_max);
+	convertVoltageToCode(&cv_data->v_min);
+	cv_data->cant_codes = cv_data->v_max - cv_data->v_min;
+	cv_data->delay = ceil( ( (cv_data->v_max-cv_data->v_min)/cv_data->scan_rate ) / cv_data->cant_codes);
 }
 
 void parseDataSWV(squareWaveVolt_t * swv_data)
 {
-	convertVoltage(&swv_data->v_max);
-	convertVoltage(&swv_data->v_min);
+	convertVoltageToCode(&swv_data->v_max);
+	convertVoltageToCode(&swv_data->v_min);
+	convertVoltageToCode(&swv_data->pulse_amplitude);
+	convertVoltageToCode(&swv_data->step_pulse);
 
-	//calcular el valor de cada siguiente pulso
-	
+	swv_data->cant_codes = ceil((swv_data->v_max - swv_data->v_min) / swv_data->step_pulse);
 }
 
 static void setGainTIA(uint8_t value)
@@ -75,13 +79,19 @@ static void setGainTIA(uint8_t value)
 	switch(value)
 	{
 		case 1:
-			setGain();
+			setGain(1);
+			clearGain(2);
+			clearGain(3);
 			break;
 		case 2:
-			setGain();
+			setGain(2);
+			clearGain(1);
+			clearGain(3);
 			break;
 		case 3:
-			setGain();
+			setGain(3);
+			clearGain(1);
+			clearGain(2);
 			break;
 		default:
 			setAutoGain();
@@ -89,9 +99,24 @@ static void setGainTIA(uint8_t value)
 	}
 }
 
-void convertVoltage(uint16_t *voltage)
+void convertVoltageToCode(uint16_t *voltage)
 {
-	*voltage = (*voltage)*(DAC_RESOLUTION / DAC_VCC) + VIRTUAL_GND;
+	*voltage = ceil( (*voltage)*(DAC_RESOLUTION / DAC_VCC) ) + VIRTUAL_GND;
 }
 
 /*=====[Implementations of private functions]================================*/
+
+static void setGain(uint8_t resistance)
+{
+	// Ver como mandar msj a switch para setear una salida
+}
+
+static void clearGain(uint8_t resistance)
+{
+	// Ver como mandar msj a switch para setear una salida
+}
+
+static void setAutoGain()
+{
+
+}
