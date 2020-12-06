@@ -40,15 +40,17 @@ _Bool experimentSet(experiment_t *experiment_input)
 {
 	setGainTIA(experiment_input->current_range);
 
-	convertVoltageToCode(&experiment_input->hold_voltage);
+	experiment_input->hold_voltage = convertVoltageToCode(experiment_input->hold_voltage);
 
 	if( !strcmp(experiment_input->experiment_type, "CV") )
 	{
 		parseDataCV(&experiment_input->cv_data);
+		return 1;
 	}
 	else if( !strcmp(experiment_input->experiment_type, "SWV") )
 	{
 		parseDataSWV(&experiment_input->swv_data);
+		return 1;
 	}
 	else
 	{
@@ -58,18 +60,18 @@ _Bool experimentSet(experiment_t *experiment_input)
 
 void parseDataCV(cyclicVolt_t *cv_data)
 {
-	convertVoltageToCode(&cv_data->v_max);
-	convertVoltageToCode(&cv_data->v_min);
+	cv_data->v_max_code = convertVoltageToCode(cv_data->v_max);
+	cv_data->v_min_code = convertVoltageToCode(cv_data->v_min);
 	cv_data->cant_codes = cv_data->v_max - cv_data->v_min;
 	cv_data->delay = ceil( ( (cv_data->v_max-cv_data->v_min)/cv_data->scan_rate ) / cv_data->cant_codes);
 }
 
 void parseDataSWV(squareWaveVolt_t * swv_data)
 {
-	convertVoltageToCode(&swv_data->v_max);
-	convertVoltageToCode(&swv_data->v_min);
-	convertVoltageToCode(&swv_data->pulse_amplitude);
-	convertVoltageToCode(&swv_data->step_pulse);
+	swv_data->v_max_code = convertVoltageToCode(swv_data->v_max);
+	swv_data->v_min_code = convertVoltageToCode(swv_data->v_min);
+	swv_data->pulse_amplitude = convertVoltageToCode(swv_data->pulse_amplitude);
+	swv_data->step_pulse = convertVoltageToCode(swv_data->step_pulse);
 
 	swv_data->cant_codes = ceil((swv_data->v_max - swv_data->v_min) / swv_data->step_pulse);
 }
@@ -99,9 +101,11 @@ static void setGainTIA(uint8_t value)
 	}
 }
 
-void convertVoltageToCode(uint16_t *voltage)
+uint16_t convertVoltageToCode(int16_t voltage)
 {
-	*voltage = ceil( (*voltage)*(DAC_RESOLUTION / DAC_VCC) ) + VIRTUAL_GND;
+	voltage = voltage + VIRTUAL_GND;
+
+	return (voltage*DAC_RESOLUTION/DAC_VCC);
 }
 
 /*=====[Implementations of private functions]================================*/

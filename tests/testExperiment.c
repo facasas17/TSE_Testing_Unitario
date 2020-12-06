@@ -25,14 +25,41 @@
 
 /*=====[Definitions of private global variables]=============================*/
 
-void test_experimentSet( void ) 
+void test_experimentSet_CV( void ) 
 {
-   //int datos[] = {1,2,3,4,5};
-   //int resultado;
-   experiment_t experiment_input = {.experiment_type = "XCV"};
+   experiment_t experiment_input = {.experiment_type = "CV", .current_range = 1,
+                                    .hold_time = 1, .hold_voltage = 1500,
+                                    .cv_data.cycles = 2, .cv_data.scan_rate = 10,
+                                    .cv_data.v_max = 1500, .cv_data.v_min = 500};
+
+   TEST_ASSERT_EQUAL(1, experimentSet(&experiment_input));
+}
+
+void test_experimentSet_SWV( void ) 
+{
+   experiment_t experiment_input = {.experiment_type = "SWV", .current_range = 1,
+                                    .hold_time = 1, .hold_voltage = 1500,
+                                    .swv_data.cycles = 2, .swv_data.pulse_amplitude = 100,
+                                    .swv_data.pulse_period = 12, .swv_data.pulse_width = 6,
+                                    .swv_data.step_pulse = 50, .swv_data.v_max = 1500,
+                                    .swv_data.v_min = 200};
+
+   TEST_ASSERT_EQUAL(1, experimentSet(&experiment_input));
+}
+
+void test_experimentSet_NULL( void ) 
+{
+   experiment_t experiment_input = {.experiment_type = "swv"};
 
    TEST_ASSERT_EQUAL(0, experimentSet(&experiment_input));
-   //TEST_ASSERT_EQUAL(3, resultado);
 }
+
+void test_convertVoltageToCode( void )
+{
+   uint16_t data_test;
+
+   TEST_ASSERT_EQUAL(65535, convertVoltageToCode(1500));
+}
+
 
 /*=====[Prototypes (declarations) of private functions]====================*/

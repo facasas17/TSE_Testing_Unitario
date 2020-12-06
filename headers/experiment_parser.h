@@ -28,17 +28,20 @@ extern "C" {
 #endif
 
 /*=====[Definition macros of public constants]===============================*/
-#define DAC_RESOLUTION	2^16
-#define DAC_VCC			3300	//Expresado en mV
-#define VIRTUAL_GND		1500	// Tierra virtual aplicada a los electrodos
+#define DAC_RESOLUTION			65535
+#define DAC_VCC					3000	//Expresado en mV
+#define VIRTUAL_GND				1500	// Tierra virtual aplicada a los electrodos
+#define VIRTUAL_GND_CODE		(DAC_RESOLUTION / 2)
 
 /*=====[Public function-like macros]=========================================*/
 
 /*=====[Definitions of public data types]====================================*/
 
 typedef struct{
-	uint16_t v_max;
-	uint16_t v_min;
+	int16_t v_max;
+	int16_t v_min;
+	uint16_t v_max_code;
+	uint16_t v_min_code;
 	uint8_t scan_rate;
 	uint8_t cycles;
 	uint16_t cant_codes;
@@ -46,8 +49,10 @@ typedef struct{
 }cyclicVolt_t;
 
 typedef struct{
-	uint16_t v_max;
-	uint16_t v_min;
+	int16_t v_max;
+	int16_t v_min;
+	uint16_t v_max_code;
+	uint16_t v_min_code;
 	uint16_t pulse_amplitude;
 	uint8_t pulse_width;
 	uint8_t pulse_period;
@@ -68,7 +73,7 @@ typedef struct{
 /*=====[Prototypes (declarations) of public functions]=======================*/
 _Bool experimentSet(experiment_t *experiment_input);
 
-void convertVoltageToCode(uint16_t *voltage);
+uint16_t convertVoltageToCode(int16_t voltage);
 
 void parseDataSWV(squareWaveVolt_t *swv_data);
 
