@@ -13,19 +13,6 @@
 /*=====[Inclusion of own header]=============================================*/
 #include "experiment_parser.h"
 
-/*=====[Definition macros of private constants]==============================*/
-
-/*=====[Private function-like macros]========================================*/
-
-/*=====[Definitions of private data types]===================================*/
-
-/*=====[Definitions of external public global variables]=====================*/
-
-/*=====[Definitions of public global variables]==============================*/
-
-/*=====[Definitions of private global variables]=============================*/
-
-
 /*=====[Prototypes (declarations) of private functions]====================*/
 static void setGainTIA(uint8_t value);
 
@@ -36,6 +23,12 @@ static void clearGain(uint8_t resistance);
 static void setAutoGain();
 /*=====[Prototypes (declarations) of public functions]======================*/
 
+/**
+ * @brief Funcion para parsear los datos del experimentos seleccionados, segun el DAC utilizado
+ * 
+ * @param experiment_input estructura con los datos ingresados por el usuario
+ * @return _Bool 1 si el experimento elegido es correcto, 0 si es incorrecto
+ */
 _Bool experimentSet(experiment_t *experiment_input)
 {
 	setGainTIA(experiment_input->current_range);
@@ -58,24 +51,38 @@ _Bool experimentSet(experiment_t *experiment_input)
 	}
 }
 
+/**
+ * @brief Parsea los datos de una voltametrica ciclica (CV) al codigo correspondiente del DAC.
+ * 
+ * @param cv_data estructura con todos los parametros de una CV
+ */
 void parseDataCV(cyclicVolt_t *cv_data)
 {
 	cv_data->v_max_code = convertVoltageToCode(cv_data->v_max);
 	cv_data->v_min_code = convertVoltageToCode(cv_data->v_min);
-	cv_data->cant_codes = cv_data->v_max - cv_data->v_min;
-	cv_data->delay = ceil( ( (cv_data->v_max-cv_data->v_min)/cv_data->scan_rate ) / cv_data->cant_codes);
+	cv_data->cant_codes = cv_data->v_max_code - cv_data->v_min_code;
+	cv_data->delay = ( (1000*(cv_data->v_max - cv_data->v_min) / cv_data->scan_rate ) / cv_data->cant_codes);
 }
 
+/**
+ * @brief Parsea los datos de una voltametrica cuadrada (SWV) al codigo correspondiente del DAC.
+ * 
+ * @param swv_data estructura con todos los parametros de una SWV
+ */
 void parseDataSWV(squareWaveVolt_t * swv_data)
 {
 	swv_data->v_max_code = convertVoltageToCode(swv_data->v_max);
 	swv_data->v_min_code = convertVoltageToCode(swv_data->v_min);
-	swv_data->pulse_amplitude = convertVoltageToCode(swv_data->pulse_amplitude);
-	swv_data->step_pulse = convertVoltageToCode(swv_data->step_pulse);
-
-	swv_data->cant_codes = ceil((swv_data->v_max - swv_data->v_min) / swv_data->step_pulse);
+	swv_data->pulse_amplitude_code = convertVoltageToCode(swv_data->pulse_amplitude);
+	swv_data->step_pulse_code = convertVoltageToCode(swv_data->step_pulse);
+	swv_data->cant_codes = (swv_data->v_max - swv_data->v_min)/swv_data->step_pulse;
 }
 
+/**
+ * @brief Setea la ganancia del TIA 
+ * 
+ * @param value rango de corriente elegido
+ */
 static void setGainTIA(uint8_t value)
 {
 	switch(value)
@@ -101,6 +108,12 @@ static void setGainTIA(uint8_t value)
 	}
 }
 
+/**
+ * @brief Convierte el codigo en mV al codigo correspondiente para el DAC
+ * 
+ * @param voltage valor a transformar
+ * @return uint16_t valro transformado
+ */
 uint16_t convertVoltageToCode(int16_t voltage)
 {
 	voltage = voltage + VIRTUAL_GND;

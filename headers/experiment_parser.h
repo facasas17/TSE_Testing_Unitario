@@ -7,7 +7,7 @@
          (example: BSD-3-Clause <https://opensource.org/licenses/BSD-3-Clause>)
  *
  * Version: 0.0.1
- * Creation Date: 2020/10/26
+ * Creation Date: 2020/12/2
  */
 
 /*=====[Avoid multiple inclusion - begin]====================================*/
@@ -33,8 +33,6 @@ extern "C" {
 #define VIRTUAL_GND				1500	// Tierra virtual aplicada a los electrodos
 #define VIRTUAL_GND_CODE		(DAC_RESOLUTION / 2)
 
-/*=====[Public function-like macros]=========================================*/
-
 /*=====[Definitions of public data types]====================================*/
 
 typedef struct{
@@ -45,7 +43,7 @@ typedef struct{
 	uint8_t scan_rate;
 	uint8_t cycles;
 	uint16_t cant_codes;
-	uint32_t delay;
+	uint32_t delay;	//en ms
 }cyclicVolt_t;
 
 typedef struct{
@@ -54,11 +52,13 @@ typedef struct{
 	uint16_t v_max_code;
 	uint16_t v_min_code;
 	uint16_t pulse_amplitude;
+	uint16_t pulse_amplitude_code;
 	uint8_t pulse_width;
 	uint8_t pulse_period;
 	uint16_t step_pulse;
+	uint16_t step_pulse_code;
 	uint8_t cycles;
-	uint32_t cant_codes;
+	uint16_t cant_codes;
 }squareWaveVolt_t;
 
 typedef struct{
@@ -78,11 +78,6 @@ uint16_t convertVoltageToCode(int16_t voltage);
 void parseDataSWV(squareWaveVolt_t *swv_data);
 
 void parseDataCV(cyclicVolt_t *cv_data);
-
-
-
-/*=====[Prototypes (declarations) of public interrupt functions]=============*/
-
 
 /*=====[C++ - end]===========================================================*/
 

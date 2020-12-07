@@ -7,59 +7,74 @@
          (example: BSD-3-Clause <https://opensource.org/licenses/BSD-3-Clause>)
  *
  * Version: 0.0.1
- * Creation Date: 2020/10/26
+ * Creation Date: 2020/12/2
  */
 /*=====[Inclusion of own header]=============================================*/
 #include "unity.h"
 #include "experiment_parser.h"
+#include "string.h"
 
 /*=====[Definition macros of private constants]==============================*/
-
-/*=====[Private function-like macros]========================================*/
-
-/*=====[Definitions of private data types]===================================*/
-
-/*=====[Definitions of external public global variables]=====================*/
-
-/*=====[Definitions of public global variables]==============================*/
+#define cantidad(variable, tipo) (sizeof(variable) / sizeof(tipo))
 
 /*=====[Definitions of private global variables]=============================*/
+experiment_t EXPERIMENTOS[] = {
+   {
+      .experiment_type = "CV", .current_range = 1,  .hold_time = 1, .hold_voltage = 1500,
+      .cv_data.cycles = 2, .cv_data.scan_rate = 10, .cv_data.v_max = 1500, .cv_data.v_min = 500,
+   },{
+      .experiment_type = "SWV", .current_range = 1, .hold_time = 1, .hold_voltage = 1500,
+      .swv_data.cycles = 2, .swv_data.pulse_amplitude = 100, .swv_data.pulse_period = 12, 
+      .swv_data.pulse_width = 6, .swv_data.step_pulse = 50, .swv_data.v_max = 1500, .swv_data.v_min = 200,
+   }
+};
 
-void test_experimentSet_CV( void ) 
+/*=====[Definitions of test functions]=============================*/
+
+void test_experimentSet( void )
 {
-   experiment_t experiment_input = {.experiment_type = "CV", .current_range = 1,
-                                    .hold_time = 1, .hold_voltage = 1500,
-                                    .cv_data.cycles = 2, .cv_data.scan_rate = 10,
-                                    .cv_data.v_max = 1500, .cv_data.v_min = 500};
+   char mensaje[32];
 
-   TEST_ASSERT_EQUAL(1, experimentSet(&experiment_input));
+   for (int i = 0; i < cantidad(EXPERIMENTOS, experiment_t); i++) 
+   {
+      experiment_t *experimento = &EXPERIMENTOS[i];
+      sprintf(mensaje, "Ejemplo %d", i);
+      TEST_ASSERT_EQUAL_MESSAGE(1, experimentSet(experimento),mensaje);
+   }
 }
 
-void test_experimentSet_SWV( void ) 
+void test_experimentSet_NULL( void )
 {
-   experiment_t experiment_input = {.experiment_type = "SWV", .current_range = 1,
-                                    .hold_time = 1, .hold_voltage = 1500,
-                                    .swv_data.cycles = 2, .swv_data.pulse_amplitude = 100,
-                                    .swv_data.pulse_period = 12, .swv_data.pulse_width = 6,
-                                    .swv_data.step_pulse = 50, .swv_data.v_max = 1500,
-                                    .swv_data.v_min = 200};
+   experiment_t test = { .experiment_type = "cv", .current_range = 1,  .hold_time = 1, .hold_voltage = 1500,
+                         .cv_data.cycles = 2, .cv_data.scan_rate = 10, .cv_data.v_max = 1500, .cv_data.v_min = 500};
 
-   TEST_ASSERT_EQUAL(1, experimentSet(&experiment_input));
-}
-
-void test_experimentSet_NULL( void ) 
-{
-   experiment_t experiment_input = {.experiment_type = "swv"};
-
-   TEST_ASSERT_EQUAL(0, experimentSet(&experiment_input));
+   TEST_ASSERT_EQUAL(0, experimentSet(&test));
 }
 
 void test_convertVoltageToCode( void )
 {
-   uint16_t data_test;
+   experiment_t *experimento = &EXPERIMENTOS[1];
 
-   TEST_ASSERT_EQUAL(65535, convertVoltageToCode(1500));
+   TEST_ASSERT_EQUAL(65535, convertVoltageToCode(experimento->swv_data.v_max));
 }
 
+void test_parseDataCV( void )
+{
+   cyclicVolt_t *experimento = &EXPERIMENTOS[0].cv_data;
+
+   parseDataCV(experimento);
+
+   TEST_ASSERT_EQUAL(21845, experimento->cant_codes);
+   TEST_ASSERT_EQUAL(4, experimento->delay);
+}
+
+void test_parseDataSWV( void )
+{
+   squareWaveVolt_t *experimento = &EXPERIMENTOS[1].swv_data;
+
+   parseDataSWV(experimento);
+
+   TEST_ASSERT_EQUAL(26,experimento->cant_codes);
+}
 
 /*=====[Prototypes (declarations) of private functions]====================*/
