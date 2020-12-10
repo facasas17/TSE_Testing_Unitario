@@ -1,6 +1,6 @@
 /*=====[experiment_parser.h]======================================================
- * Copyright 2020 Author:
- * Fabiola de las Casas Escardó <fabioladelascasas@gmail.com>
+ * Copyright 2020 
+ * Author: Fabiola de las Casas Escardó <fabioladelascasas@gmail.com>
  *
  * All rights reserved.
  * License: license text or at least name and link
@@ -9,12 +9,19 @@
  * Version: 0.0.1
  * Creation Date: 2020/12/2
  */
-
 /*=====[Avoid multiple inclusion - begin]====================================*/
 
 #ifndef EXPERIMENT_PARSER_H
 #define EXPERIMENT_PARSER_H
 
+/**
+ * @file experiment_parser.h
+ * @brief Libreria para convertir la configuracion ingresada por el usuario a la necesario para el conversor digital analogico utilizado
+ * 
+ * El usuario ingresa los datos del experimento en mV y ms. Segun la resolucion del DAC utilizado y la configuracion del hardware,
+ * se convierten estos valores al codigo correspondiente a enviar al DAC para generar la señal deseada.
+ * 
+ */
 /*=====[Inclusions of public function dependencies]==========================*/
 #include "string.h"
 #include "stdint.h"
@@ -35,6 +42,10 @@ extern "C" {
 
 /*=====[Definitions of public data types]====================================*/
 
+/**
+ * @brief Estructura con los parametros de Voltametria Ciclica (CV)
+ * 
+ */
 typedef struct{
 	int16_t v_max;
 	int16_t v_min;
@@ -46,6 +57,10 @@ typedef struct{
 	uint32_t delay;	//en ms
 }cyclicVolt_t;
 
+/**
+ * @brief Estructura con los parametros de Voltametria Cuadrada (SWV)
+ * 
+ */
 typedef struct{
 	int16_t v_max;
 	int16_t v_min;
@@ -61,6 +76,10 @@ typedef struct{
 	uint16_t cant_codes;
 }squareWaveVolt_t;
 
+/**
+ * @brief Estructura con los parametros generales de un experimento
+ * 
+ */
 typedef struct{
 	char *experiment_type;
 	uint8_t hold_time;
@@ -71,12 +90,34 @@ typedef struct{
 }experiment_t;
 
 /*=====[Prototypes (declarations) of public functions]=======================*/
+/**
+ * @brief Funcion para parsear los datos del experimentos seleccionados, segun el DAC utilizado
+ * 
+ * @param experiment_input estructura con los datos ingresados por el usuario
+ * @return _Bool 1 si el experimento elegido es correcto, 0 si es incorrecto
+ */
 _Bool experimentSet(experiment_t *experiment_input);
 
+/**
+ * @brief Convierte el codigo en mV al codigo correspondiente para el DAC
+ * 
+ * @param voltage valor a transformar
+ * @return uint16_t valor transformado
+ */
 uint16_t convertVoltageToCode(int16_t voltage);
 
+/**
+ * @brief Parsea los datos de una voltametrica cuadrada (SWV) al codigo correspondiente del DAC.
+ * 
+ * @param swv_data estructura con todos los parametros de una SWV
+ */
 void parseDataSWV(squareWaveVolt_t *swv_data);
 
+/**
+ * @brief Parsea los datos de una voltametrica ciclica (CV) al codigo correspondiente del DAC.
+ * 
+ * @param cv_data estructura con todos los parametros de una CV
+ */
 void parseDataCV(cyclicVolt_t *cv_data);
 
 /*=====[C++ - end]===========================================================*/
